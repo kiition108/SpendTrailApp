@@ -10,6 +10,7 @@ export default function TransactionDetailScreen({ route }) {
       <Text>Amount: ₹{transaction.amount}</Text>
       <Text>Category: {transaction.category}</Text>
       <Text>Date: {new Date(transaction.timestamp).toLocaleDateString()}</Text>
+      <Text>Address: {transaction.location?.address}</Text>
     </View>
   );
 }

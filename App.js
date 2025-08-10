@@ -1,18 +1,15 @@
+// App.js
+import 'react-native-gesture-handler';
+import { enableScreens } from 'react-native-screens';
+enableScreens();
+
 import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import AppNavigator from './navigation/AppNavigator';
 import { ActivityIndicator, View } from 'react-native';
 
-export default function App() {
-  return (
-    <AuthProvider>
-      <RootNavigator />
-    </AuthProvider>
-  );
-}
-
-function RootNavigator() {
+function RootNavigation() {
   const { loading } = useContext(AuthContext);
 
   if (loading) {
@@ -27,5 +24,13 @@ function RootNavigator() {
     <NavigationContainer>
       <AppNavigator />
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <RootNavigation />
+    </AuthProvider>
   );
 }
