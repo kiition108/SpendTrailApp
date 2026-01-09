@@ -31,10 +31,14 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
+.env.example
 
 # typescript
 *.tsbuildinfo
 
 #android
 android/
+#markdown
+*.md

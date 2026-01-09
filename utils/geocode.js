@@ -1,26 +1,42 @@
 // utils/geocode.js
-import axios from 'axios';
+import * as Location from 'expo-location';
 
 export async function reverseGeocode(lat, lng) {
   try {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-    const response = await axios.get(url, {
-      headers: { 'User-Agent': 'SpendTrail/1.0 (your-email@example.com)' },
+    const result = await Location.reverseGeocodeAsync({
+      latitude: lat,
+      longitude: lng,
     });
 
-    const data = response.data; // ✅ Axios gives data directly
-    console.log(data)
+    if (result.length > 0) {
+      const data = result[0];
+      // Construct address
+      const addressParts = [data.name, data.street, data.district].filter(p => p);
+      const address = addressParts.join(', ');
+
+      return {
+        lat: lat,
+        lng: lng,
+        address: address || '',
+        city: data.city || data.subregion || '',
+        country: data.country || '',
+        placeName: data.name || '',
+      };
+    }
+
     return {
-      lat:data?.lat,
-      lng:data?.lon,
-      address: data.display_name || '',
-      city: data.address?.city || data.address?.town || data.address?.village || data.address?.state||'',
-      country: data.address?.country || '',
-      placeName: data.name || data.address?.attraction || data.address?.suburb|| '',
+      lat: lat,
+      lng: lng,
+      address: '',
+      city: '',
+      country: '',
+      placeName: '',
     };
   } catch (error) {
     console.error('Reverse geocoding failed:', error.message);
     return {
+      lat: lat,
+      lng: lng,
       address: '',
       city: '',
       country: '',

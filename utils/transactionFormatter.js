@@ -59,8 +59,10 @@ export const formatTransactionList = (transactions) => {
       merchant: txn.merchant || 'Unknown',
       category: txn.category,
       date: formatRelativeDate(txn.timestamp),
-      amount:txn.source === 'income' ? txn.amount : -Math.abs(txn.amount),
+      timestamp: txn.timestamp, // Preserve original timestamp
+      amount: txn.source === 'income' ? txn.amount : -Math.abs(txn.amount),
       icon: getCategoryIcon(txn.category),
+      location: txn.location,
     }));
 };
 export const formatFullTransactionList = (transactions) => {
@@ -72,8 +74,9 @@ export const formatFullTransactionList = (transactions) => {
       merchant: txn.merchant || 'Unknown',
       category: txn.category,
       date: formatRelativeDate(txn.timestamp),
+      timestamp: txn.timestamp, // Preserve original timestamp
       amount: txn.source === 'income' ? txn.amount : -Math.abs(txn.amount),
       icon: getCategoryIcon(txn.category),
-      location:txn.location
+      location: txn.location
     }));
 };

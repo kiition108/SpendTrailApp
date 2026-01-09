@@ -3,6 +3,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const TOKEN_KEY = 'SPENDTRAIL_AUTH_TOKEN';
 
 export const saveToken = async (token) => {
+  if (!token) {
+    throw new Error('Token is required but received: ' + token);
+  }
   await AsyncStorage.setItem(TOKEN_KEY, token);
 };
 
