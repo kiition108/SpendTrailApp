@@ -44,7 +44,7 @@ export default function VerifyOtpScreen({ route, navigation }) {
 
     return (
         <View style={styles.container}>
-            <LinearGradient colors={['#f093fb', '#f5576c']} style={styles.gradient}>
+            <LinearGradient colors={['#667eea', '#764ba2']} style={styles.gradient}>
                 <View style={styles.content}>
                     <View style={styles.card}>
                         <Text style={styles.title}>Verify Email</Text>
@@ -62,7 +62,7 @@ export default function VerifyOtpScreen({ route, navigation }) {
 
                         <TouchableOpacity style={styles.button} onPress={handleVerify} disabled={loading}>
                             <LinearGradient
-                                colors={['#f093fb', '#f5576c']}
+                                colors={['#667eea', '#764ba2']}
                                 style={styles.buttonGradient}
                             >
                                 {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Verify</Text>}
@@ -117,5 +117,5 @@ const styles = StyleSheet.create({
     buttonGradient: { padding: 15, alignItems: 'center' },
     buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
     resendLink: { padding: 10 },
-    resendText: { color: '#f5576c', fontWeight: 'bold' }
+    resendText: { color: '#667eea', fontWeight: 'bold' }
 });

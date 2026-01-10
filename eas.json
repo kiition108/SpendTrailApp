@@ -22,7 +22,10 @@
         "API_BASE_URL": "$API_BASE_URL",
         "SMS_WEBHOOK_KEY": "$SMS_WEBHOOK_KEY",
         "NODE_ENV": "$NODE_ENV",
-        "SENTRY_DSN": "$SENTRY_DSN"
+        "SENTRY_DSN": "$SENTRY_DSN",
+        "GOOGLE_MAPS_API_KEY": "$GOOGLE_MAPS_API_KEY",
+        "SENTRY_ORG": "$SENTRY_ORG",
+        "SENTRY_PROJECT": "$SENTRY_PROJECT"
       }
     },
     "production": {
@@ -36,7 +39,10 @@
         "API_BASE_URL": "$API_BASE_URL",
         "SMS_WEBHOOK_KEY": "$SMS_WEBHOOK_KEY",
         "NODE_ENV": "$NODE_ENV",
-        "SENTRY_DSN": "$SENTRY_DSN"
+        "SENTRY_DSN": "$SENTRY_DSN",
+        "GOOGLE_MAPS_API_KEY": "$GOOGLE_MAPS_API_KEY",
+        "SENTRY_ORG": "$SENTRY_ORG",
+        "SENTRY_PROJECT": "$SENTRY_PROJECT"
       }
     }
   },

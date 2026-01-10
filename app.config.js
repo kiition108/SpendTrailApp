@@ -29,13 +29,25 @@ export default {
                 "ACCESS_BACKGROUND_LOCATION"
             ],
             package: "com.spendtrail.app",
-            edgeToEdgeEnabled: true
+            edgeToEdgeEnabled: true,
+            config: {
+                googleMaps: {
+                    apiKey: process.env.GOOGLE_MAPS_API_KEY
+                }
+            }
         },
         web: {
             favicon: "./assets/favicon.png"
         },
         plugins: [
-            "expo-font"
+            "expo-font",
+            [
+                "@sentry/react-native",
+                {
+                    organization: process.env.SENTRY_ORG || "kishan-singh-9p",
+                    project: process.env.SENTRY_PROJECT || "spendtrailapp",
+                }
+            ]
         ],
         extra: {
             // Environment variables accessible via Constants.expoConfig.extra

@@ -41,5 +41,11 @@ android/
 
 #markdown
 *.md
+# !README.md
+# !DOCUMENTATION.md
+# !QUICK_START.md
+# !SENTRY_SETUP_GUIDE.md
+# !SECURITY_AUDIT.md
+# !MAPS_SETUP.md
 
 *.txt
