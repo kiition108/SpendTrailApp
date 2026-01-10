@@ -14,8 +14,10 @@ import { getCurrentCoordinates } from '../utils/location';
 import { reverseGeocode } from '../utils/geocode';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../context/ThemeContext';
 
 export default function AddTransactionScreen({ route, navigation }) {
+  const { theme } = useTheme();
   const transactionToEdit = route.params?.transactionToEdit;
 
   const [amount, setAmount] = useState('');
@@ -126,17 +128,17 @@ export default function AddTransactionScreen({ route, navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#667eea" />
-        <Text style={styles.loadingText}>{transactionToEdit ? 'Loading details...' : 'Loading location...'}</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.textSecondary }]}>{transactionToEdit ? 'Loading details...' : 'Loading location...'}</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }]} showsVerticalScrollIndicator={false}>
       <LinearGradient
-        colors={['#667eea', '#764ba2']}
+        colors={theme.gradientColors}
         style={styles.header}
       >
         <Ionicons name={transactionToEdit ? "create" : "add-circle"} size={60} color="#fff" />
@@ -146,25 +148,25 @@ export default function AddTransactionScreen({ route, navigation }) {
 
       <View style={styles.formSection}>
         {/* Amount Input - Prominent */}
-        <View style={styles.amountContainer}>
-          <Text style={styles.currencySymbol}>₹</Text>
+        <View style={[styles.amountContainer, { backgroundColor: theme.backgroundCard }]}>
+          <Text style={[styles.currencySymbol, { color: theme.primary }]}>₹</Text>
           <TextInput
             placeholder="0.00"
-            placeholderTextColor="#ccc"
+            placeholderTextColor={theme.textTertiary}
             keyboardType="numeric"
-            style={styles.amountInput}
+            style={[styles.amountInput, { color: theme.text }]}
             value={amount}
             onChangeText={setAmount}
           />
         </View>
 
         {/* Merchant Input */}
-        <View style={styles.inputContainer}>
-          <Ionicons name="business-outline" size={20} color="#667eea" style={styles.inputIcon} />
+        <View style={[styles.inputContainer, { backgroundColor: theme.backgroundCard }]}>
+          <Ionicons name="business-outline" size={20} color={theme.primary} style={styles.inputIcon} />
           <TextInput
             placeholder="Merchant / Store Name"
-            placeholderTextColor="#999"
-            style={styles.input}
+            placeholderTextColor={theme.textTertiary}
+            style={[styles.input, { color: theme.text }]}
             value={merchant}
             onChangeText={setMerchant}
           />
@@ -172,7 +174,7 @@ export default function AddTransactionScreen({ route, navigation }) {
 
         {/* Category Selection */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Category</Text>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Category</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
             {categories.map((cat) => (
               <TouchableOpacity
@@ -196,7 +198,7 @@ export default function AddTransactionScreen({ route, navigation }) {
 
         {/* Payment Method */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Payment Method</Text>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Payment Method</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
             {paymentMethods.map((pm) => (
               <TouchableOpacity
@@ -219,12 +221,12 @@ export default function AddTransactionScreen({ route, navigation }) {
         </View>
 
         {/* Note Input */}
-        <View style={styles.inputContainer}>
-          <Ionicons name="document-text-outline" size={20} color="#667eea" style={styles.inputIcon} />
+        <View style={[styles.inputContainer, { backgroundColor: theme.backgroundCard }]}>
+          <Ionicons name="document-text-outline" size={20} color={theme.primary} style={styles.inputIcon} />
           <TextInput
             placeholder="Add a note (optional)"
-            placeholderTextColor="#999"
-            style={styles.input}
+            placeholderTextColor={theme.textTertiary}
+            style={[styles.input, { color: theme.text }]}
             value={note}
             onChangeText={setNote}
             multiline
@@ -232,22 +234,22 @@ export default function AddTransactionScreen({ route, navigation }) {
         </View>
 
         {/* Tags Input */}
-        <View style={styles.inputContainer}>
-          <Ionicons name="pricetags-outline" size={20} color="#667eea" style={styles.inputIcon} />
+        <View style={[styles.inputContainer, { backgroundColor: theme.backgroundCard }]}>
+          <Ionicons name="pricetags-outline" size={20} color={theme.primary} style={styles.inputIcon} />
           <TextInput
             placeholder="Tags (comma separated)"
-            placeholderTextColor="#999"
-            style={styles.input}
+            placeholderTextColor={theme.textTertiary}
+            style={[styles.input, { color: theme.text }]}
             value={tags}
             onChangeText={setTags}
           />
         </View>
 
         {/* Location Details */}
-        <View style={styles.locationSection}>
+        <View style={[styles.locationSection, { backgroundColor: theme.backgroundCard }]}>
           <View style={styles.locationHeader}>
-            <Ionicons name="location" size={20} color="#667eea" />
-            <Text style={styles.locationTitle}>Location Details</Text>
+            <Ionicons name="location" size={20} color={theme.primary} />
+            <Text style={[styles.locationTitle, { color: theme.text }]}>Location Details</Text>
           </View>
 
           {coords && (
@@ -300,7 +302,7 @@ export default function AddTransactionScreen({ route, navigation }) {
           disabled={saving}
         >
           <LinearGradient
-            colors={['#667eea', '#764ba2']}
+            colors={theme.gradientColors}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.buttonGradient}

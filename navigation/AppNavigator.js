@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TouchableOpacity, Image, View, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -19,20 +20,36 @@ import SmsTestScreen from '../screens/SmsTestScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ImportTransactionsScreen from '../screens/ImportTransactionsScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   const { user, logout } = useContext(AuthContext);
+  const { theme } = useTheme();
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.backgroundCard,
+        },
+        headerTintColor: theme.text,
+        headerShadowVisible: false,
+      }}
+    >
       {user ? (
         <>
           <Stack.Screen
             name="Home"
             component={HomeScreen}
             options={({ navigation }) => ({
+              headerStyle: {
+                backgroundColor: theme.backgroundCard,
+              },
+              headerTintColor: theme.text,
+              headerShadowVisible: false,
               headerLeft: () => (
                 <Image
                   source={require('../assets/splash-icon.png')}
@@ -43,10 +60,10 @@ export default function AppNavigator() {
               headerRight: () => (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginRight: 8 }}>
                   <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-                    <Ionicons name="settings-outline" size={24} color="#333" />
+                    <Ionicons name="settings-outline" size={24} color={theme.primary} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
-                    <Ionicons name="notifications-outline" size={24} color="#333" />
+                    <Ionicons name="notifications-outline" size={24} color={theme.primary} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {
@@ -60,7 +77,7 @@ export default function AppNavigator() {
                       );
                     }}
                   >
-                    <Ionicons name="log-out-outline" size={24} color="#ff3b30" />
+                    <Ionicons name="log-out-outline" size={24} color={theme.error} />
                   </TouchableOpacity>
                 </View>
               ),
@@ -94,9 +111,12 @@ export default function AppNavigator() {
         </>
       ) : (
         <>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="VerifyOtp" component={VerifyOtpScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="VerifyOtp" component={VerifyOtpScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="OTPVerification" component={VerifyOtpScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }} />
         </>
       )}
     </Stack.Navigator>

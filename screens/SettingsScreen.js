@@ -11,10 +11,12 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
 import { isAutoSyncEnabled, setAutoSyncEnabled } from '../services/smsService';
 import { exportTransactionsToCSV } from '../utils/exportTransactions';
 
 export default function SettingsScreen({ navigation }) {
+    const { theme, isDark, toggleTheme } = useTheme();
     const [smsAutoSync, setSmsAutoSync] = useState(false);
     const [loading, setLoading] = useState(true);
     const [exporting, setExporting] = useState(false);
@@ -108,8 +110,8 @@ export default function SettingsScreen({ navigation }) {
     };
 
     return (
-        <View style={styles.container}>
-            <LinearGradient colors={['#667eea', '#764ba2']} style={styles.header}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+            <LinearGradient colors={theme.gradientColors} style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
@@ -121,15 +123,15 @@ export default function SettingsScreen({ navigation }) {
                 {/* SMS Auto-Sync Section */}
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Ionicons name="mail" size={24} color="#667eea" />
-                        <Text style={styles.sectionTitle}>SMS Auto-Sync</Text>
+                        <Ionicons name="mail" size={24} color={theme.primary} />
+                        <Text style={[styles.sectionTitle, { color: theme.text }]}>SMS Auto-Sync</Text>
                     </View>
 
-                    <View style={styles.settingCard}>
+                    <View style={[styles.settingCard, { backgroundColor: theme.backgroundCard }]}>
                         <View style={styles.settingRow}>
                             <View style={styles.settingInfo}>
-                                <Text style={styles.settingLabel}>Enable SMS Sync</Text>
-                                <Text style={styles.settingDescription}>
+                                <Text style={[styles.settingLabel, { color: theme.text }]}>Enable SMS Sync</Text>
+                                <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
                                     Automatically create transactions from bank SMS
                                 </Text>
                             </View>
@@ -150,11 +152,11 @@ export default function SettingsScreen({ navigation }) {
                         )}
                     </View>
 
-                    <TouchableOpacity style={styles.helpCard} onPress={openPermissionSettings}>
-                        <Ionicons name="shield-checkmark-outline" size={20} color="#667eea" />
+                    <TouchableOpacity style={[styles.helpCard, { backgroundColor: theme.backgroundCard }]} onPress={openPermissionSettings}>
+                        <Ionicons name="shield-checkmark-outline" size={20} color={theme.primary} />
                         <View style={styles.helpContent}>
-                            <Text style={styles.helpTitle}>SMS Permissions</Text>
-                            <Text style={styles.helpText}>Manage SMS read permissions</Text>
+                            <Text style={[styles.helpTitle, { color: theme.text }]}>SMS Permissions</Text>
+                            <Text style={[styles.helpText, { color: theme.textSecondary }]}>Manage SMS read permissions</Text>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color="#ccc" />
                     </TouchableOpacity>
@@ -169,80 +171,151 @@ export default function SettingsScreen({ navigation }) {
                     </View>
                 </View>
 
+                {/* Theme Section */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="moon" size={24} color={theme.primary} />
+                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Appearance</Text>
+                    </View>
+
+                    <View style={[styles.settingCard, { backgroundColor: theme.backgroundCard }]}>
+                        <View style={styles.settingRow}>
+                            <View style={styles.settingInfo}>
+                                <Text style={[styles.settingLabel, { color: theme.text }]}>Dark Mode</Text>
+                                <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                                    {isDark ? 'Dark theme enabled' : 'Light theme enabled'}
+                                </Text>
+                            </View>
+                            <Switch
+                                value={isDark}
+                                onValueChange={toggleTheme}
+                                trackColor={{ false: theme.border, true: theme.primary }}
+                                thumbColor={isDark ? '#fff' : '#f4f3f4'}
+                            />
+                        </View>
+
+                        {isDark && (
+                            <View style={[styles.enabledInfo, { borderTopColor: theme.divider }]}>
+                                <Ionicons name="moon" size={16} color={theme.primary} />
+                                <Text style={[styles.enabledText, { color: theme.primary }]}>
+                                    Dark mode active
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+
+                    <View style={[styles.infoCard, { backgroundColor: theme.background }]}>
+                        <Ionicons name="information-circle" size={20} color={theme.info} />
+                        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+                            Theme preference is saved and will persist across app restarts.
+                        </Text>
+                    </View>
+                </View>
+
                 {/* Test Section */}
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Ionicons name="flask" size={24} color="#667eea" />
-                        <Text style={styles.sectionTitle}>Testing & Debug</Text>
+                        <Ionicons name="flask" size={24} color={theme.primary} />
+                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Testing & Debug</Text>
                     </View>
 
                     <TouchableOpacity
-                        style={styles.actionCard}
+                        style={[styles.actionCard, { backgroundColor: theme.backgroundCard }]}
                         onPress={() => navigation.navigate('SmsTest')}
                     >
                         <View style={styles.actionIcon}>
-                            <Ionicons name="mail-outline" size={24} color="#667eea" />
+                            <Ionicons name="mail-outline" size={24} color={theme.primary} />
                         </View>
                         <View style={styles.actionContent}>
-                            <Text style={styles.actionTitle}>Test SMS Parsing</Text>
-                            <Text style={styles.actionDescription}>
+                            <Text style={[styles.actionTitle, { color: theme.text }]}>Test SMS Parsing</Text>
+                            <Text style={[styles.actionDescription, { color: theme.textSecondary }]}>
                                 Test how your bank SMS will be parsed
                             </Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                        <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.actionCard}
+                        style={[styles.actionCard, { backgroundColor: theme.backgroundCard }]}
+                        onPress={() => {
+                            Alert.alert(
+                                '📧 Email Receipt Forwarding',
+                                `Forward your bank transaction emails to:\n\ne1wpm.spendtrail@inbox.testmail.app\n\nThe system will automatically:\n✓ Verify your email matches your account\n✓ Parse transaction details (amount, merchant)\n✓ Add transaction to your account\n\nNote: Ensure your registered email matches the sender email.`,
+                                [
+                                    {
+                                        text: 'Copy Address',
+                                        onPress: () => {
+                                            Alert.alert('Forwarding Address', 'e1wpm.spendtrail@inbox.testmail.app\n\nCopy this address to your email app.');
+                                        }
+                                    },
+                                    { text: 'Got It', style: 'cancel' }
+                                ]
+                            );
+                        }}
+                    >
+                        <View style={[styles.actionIcon, { backgroundColor: '#fff0f5' }]}>
+                            <Ionicons name="mail" size={24} color="#FF6B9D" />
+                        </View>
+                        <View style={styles.actionContent}>
+                            <Text style={[styles.actionTitle, { color: theme.text }]}>Email Ingestion</Text>
+                            <Text style={[styles.actionDescription, { color: theme.textSecondary }]}>
+                                Forward receipts to auto-add transactions
+                            </Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.actionCard, { backgroundColor: theme.backgroundCard }]}
                         onPress={() => navigation.navigate('ImportTransactions')}
                     >
                         <View style={styles.actionIcon}>
-                            <Ionicons name="cloud-upload-outline" size={24} color="#667eea" />
+                            <Ionicons name="cloud-upload-outline" size={24} color={theme.primary} />
                         </View>
                         <View style={styles.actionContent}>
-                            <Text style={styles.actionTitle}>Import Transactions</Text>
-                            <Text style={styles.actionDescription}>
+                            <Text style={[styles.actionTitle, { color: theme.text }]}>Import Transactions</Text>
+                            <Text style={[styles.actionDescription, { color: theme.textSecondary }]}>
                                 Upload CSV file to bulk import transactions
                             </Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                        <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.actionCard}
+                        style={[styles.actionCard, { backgroundColor: theme.backgroundCard }]}
                         onPress={handleExportTransactions}
                         disabled={exporting}
                     >
                         <View style={styles.actionIcon}>
-                            <Ionicons name="cloud-download-outline" size={24} color="#4caf50" />
+                            <Ionicons name="cloud-download-outline" size={24} color={theme.success} />
                         </View>
                         <View style={styles.actionContent}>
-                            <Text style={styles.actionTitle}>
+                            <Text style={[styles.actionTitle, { color: theme.text }]}>
                                 {exporting ? 'Exporting...' : 'Export Transactions'}
                             </Text>
-                            <Text style={styles.actionDescription}>
+                            <Text style={[styles.actionDescription, { color: theme.textSecondary }]}>
                                 Download all transactions as CSV file
                             </Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                        <Ionicons name="chevron-forward" size={20} color={theme.textTertiary} />
                     </TouchableOpacity>
                 </View>
 
                 {/* About Section */}
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Ionicons name="information-circle" size={24} color="#667eea" />
-                        <Text style={styles.sectionTitle}>About</Text>
+                        <Ionicons name="information-circle" size={24} color={theme.primary} />
+                        <Text style={[styles.sectionTitle, { color: theme.text }]}>About</Text>
                     </View>
 
-                    <View style={styles.aboutCard}>
-                        <Text style={styles.aboutLabel}>App Version</Text>
-                        <Text style={styles.aboutValue}>1.0.0</Text>
+                    <View style={[styles.aboutCard, { backgroundColor: theme.backgroundCard }]}>
+                        <Text style={[styles.aboutLabel, { color: theme.textSecondary }]}>App Version</Text>
+                        <Text style={[styles.aboutValue, { color: theme.text }]}>1.0.0</Text>
                     </View>
 
-                    <View style={styles.aboutCard}>
-                        <Text style={styles.aboutLabel}>Build</Text>
-                        <Text style={styles.aboutValue}>Development</Text>
+                    <View style={[styles.aboutCard, { backgroundColor: theme.backgroundCard }]}>
+                        <Text style={[styles.aboutLabel, { color: theme.textSecondary }]}>Build</Text>
+                        <Text style={[styles.aboutValue, { color: theme.text }]}>Development</Text>
                     </View>
                 </View>
             </ScrollView>

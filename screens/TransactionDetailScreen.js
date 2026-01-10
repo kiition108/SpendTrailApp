@@ -3,8 +3,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIn
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import API from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 
 export default function TransactionDetailScreen({ route, navigation }) {
+  const { theme } = useTheme();
   const { transaction } = route.params;
   const [loading, setLoading] = useState(false);
 
@@ -90,7 +92,7 @@ export default function TransactionDetailScreen({ route, navigation }) {
   const categoryColor = getCategoryColor(transaction.category);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <LinearGradient
         colors={[categoryColor, categoryColor + 'CC']}
         style={styles.header}
@@ -99,7 +101,7 @@ export default function TransactionDetailScreen({ route, navigation }) {
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={styles.amountContainer}>
-          <Text style={styles.currencySymbol}>{transaction.amount < 0 ? '+' : '-'}₹</Text>
+          <Text style={styles.currencySymbol}>{transaction.amount > 0 ? '+' : ''}₹</Text>
           <Text style={styles.amount}>{Math.abs(transaction.amount)}</Text>
         </View>
         <Text style={styles.headerSubtitle}>Transaction Details</Text>
@@ -107,19 +109,19 @@ export default function TransactionDetailScreen({ route, navigation }) {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Merchant/Title Section */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.backgroundCard }]}>
           <View style={styles.cardHeader}>
             <Ionicons name="business" size={24} color={categoryColor} />
-            <Text style={styles.cardTitle}>Merchant</Text>
+            <Text style={[styles.cardTitle, { color: theme.text }]}>Merchant</Text>
           </View>
-          <Text style={styles.cardValue}>{transaction.merchant || 'N/A'}</Text>
+          <Text style={[styles.cardValue, { color: theme.textSecondary }]}>{transaction.merchant || 'N/A'}</Text>
         </View>
 
         {/* Category Section */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.backgroundCard }]}>
           <View style={styles.cardHeader}>
             <Ionicons name="pricetag" size={24} color={categoryColor} />
-            <Text style={styles.cardTitle}>Category</Text>
+            <Text style={[styles.cardTitle, { color: theme.text }]}>Category</Text>
           </View>
           <View style={styles.categoryBadge}>
             <Text style={[styles.categoryBadgeText, { color: categoryColor }]}>
@@ -129,31 +131,31 @@ export default function TransactionDetailScreen({ route, navigation }) {
         </View>
 
         {/* Date & Time Section */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.backgroundCard }]}>
           <View style={styles.cardHeader}>
             <Ionicons name="calendar" size={24} color={categoryColor} />
-            <Text style={styles.cardTitle}>Date & Time</Text>
+            <Text style={[styles.cardTitle, { color: theme.text }]}>Date & Time</Text>
           </View>
-          <Text style={styles.cardValue}>{formatDate(transaction.timestamp || transaction.date || transaction.createdAt)}</Text>
+          <Text style={[styles.cardValue, { color: theme.textSecondary }]}>{formatDate(transaction.timestamp || transaction.date || transaction.createdAt)}</Text>
         </View>
 
         {/* Note Section (if exists) */}
         {transaction.note && (
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: theme.backgroundCard }]}>
             <View style={styles.cardHeader}>
               <Ionicons name="document-text" size={24} color={categoryColor} />
-              <Text style={styles.cardTitle}>Note</Text>
+              <Text style={[styles.cardTitle, { color: theme.text }]}>Note</Text>
             </View>
-            <Text style={styles.cardValue}>{transaction.note}</Text>
+            <Text style={[styles.cardValue, { color: theme.textSecondary }]}>{transaction.note}</Text>
           </View>
         )}
 
         {/* Location Section */}
         {transaction.location && (
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: theme.backgroundCard }]}>
             <View style={styles.cardHeader}>
               <Ionicons name="location" size={24} color={categoryColor} />
-              <Text style={styles.cardTitle}>Location</Text>
+              <Text style={[styles.cardTitle, { color: theme.text }]}>Location</Text>
             </View>
 
             {transaction.location.address && (

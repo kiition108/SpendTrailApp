@@ -1,19 +1,21 @@
 import React, { useEffect, useState, useCallback, useContext } from 'react';
-import { View, FlatList, Image, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, FlatList, Image, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import API from '../services/api';
 import TransactionCard from '../components/TransactionCard';
 import { startBackgroundLocation, stopBackgroundLocation } from '../utils/locationService/backgroundLocation';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
-import { LineChart, BarChart } from '../components/Charts';
 import { useFocusEffect } from '@react-navigation/native';
 import { RefreshControl } from 'react-native';
 import { formatTransactionList } from '../utils/transactionFormatter';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Sentry from '@sentry/react-native';
 
 
 export default function HomeScreen({ navigation }) {
   const { logout } = useContext(AuthContext);
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -22,31 +24,7 @@ export default function HomeScreen({ navigation }) {
 
 
 
-  const SparklineChart = ({ data }) => {
-    const chartData = data.map(d => d.amount); // flatten to numbers
-    return (
-      <LineChart
-        style={{ height: 40 }}
-        data={chartData}
-        svg={{ stroke: '#4caf50' }}
-        contentInset={{ top: 5, bottom: 5 }}
-      />
-    );
-  };
 
-  const WeeklyBarChart = ({ data }) => {
-    const chartData = data.map(d => ({ value: d.amount })); // convert to { value }
-    return (
-      <BarChart
-        style={{ height: 40 }}
-        data={chartData}
-        yAccessor={({ item }) => item.value}
-        svg={{ fill: '#2196f3' }}
-        contentInset={{ top: 5, bottom: 5 }}
-        spacingInner={0.2}
-      />
-    );
-  };
 
   useEffect(() => {
     const startTracking = async () => {
@@ -97,21 +75,21 @@ export default function HomeScreen({ navigation }) {
 
   if (loading && !refreshing) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text>Loading summary...</Text>
+      <View style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: theme.text }}>Loading summary...</Text>
       </View>
     );
   }
 
   if (!summary || !summary.today || !summary.week) {
     return (
-      <View style={styles.container}>
-        <Text>Loading summary...</Text>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <Text style={{ color: theme.text }}>Loading summary...</Text>
       </View>
     );
   }
   return (
-    <ScrollView style={styles.container}
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={() => {
           setRefreshing(true);
@@ -123,58 +101,53 @@ export default function HomeScreen({ navigation }) {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cardScroll}>
         {/* Sparkline Card */}
-        <View style={styles.summaryCard}>
-          <Text style={styles.cardTitle}>Today’s Spend</Text>
-          <Text style={styles.cardAmount}>₹{summary.today.total}</Text>
-          <Text style={styles.cardSub}>{summary.today.count} txns</Text>
-          <SparklineChart data={summary.today.chart} />
+        <View style={[styles.summaryCard, { backgroundColor: theme.backgroundCard }]}>
+          <Text style={[styles.cardTitle, { color: theme.textSecondary }]}>Today's Spend</Text>
+          <Text style={[styles.cardAmount, { color: theme.text }]}>₹{summary.today.total}</Text>
+          <Text style={[styles.cardSub, { color: theme.textTertiary }]}>{summary.today.count} txns</Text>
         </View>
 
         {/* Bar Chart Card */}
-        <View style={styles.summaryCard}>
-          <Text style={styles.cardTitle}>This Week</Text>
-          <Text style={styles.cardAmount}>₹{summary.week.total}</Text>
-          <Text style={styles.cardSub}>{summary.week.count} txns</Text>
-          <WeeklyBarChart data={summary.week.chart} />
+        <View style={[styles.summaryCard, { backgroundColor: theme.backgroundCard }]}>
+          <Text style={[styles.cardTitle, { color: theme.textSecondary }]}>This Week</Text>
+          <Text style={[styles.cardAmount, { color: theme.text }]}>₹{summary.week.total}</Text>
+          <Text style={[styles.cardSub, { color: theme.textTertiary }]}>{summary.week.count} txns</Text>
         </View>
       </ScrollView>
 
 
       {/* Action Buttons */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.actionRowContainer}
-        contentContainerStyle={styles.actionRow}
-      >
-        <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('AddTransaction')}>
-          <View style={[styles.actionIconContainer, { backgroundColor: '#667eea' }]}>
-            <Ionicons name="add-circle-outline" size={24} color="#fff" />
-          </View>
-          <Text style={styles.actionText}>Add Txn</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('MapView')}>
-          <View style={[styles.actionIconContainer, { backgroundColor: '#4ECDC4' }]}>
-            <Ionicons name="location-outline" size={24} color="#fff" />
-          </View>
-          <Text style={styles.actionText}>Map</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Categories')}>
-          <View style={[styles.actionIconContainer, { backgroundColor: '#FFB84D' }]}>
-            <FontAwesome5 name="chart-pie" size={20} color="#fff" />
-          </View>
-          <Text style={styles.actionText}>Categories</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Reports')}>
-          <View style={[styles.actionIconContainer, { backgroundColor: '#A461D8' }]}>
-            <MaterialIcons name="bar-chart" size={24} color="#fff" />
-          </View>
-          <Text style={styles.actionText}>Reports</Text>
-        </TouchableOpacity>
-      </ScrollView>
+      <View style={styles.actionRowContainer}>
+        <View style={[styles.actionRow, { backgroundColor: theme.backgroundCard }]}>
+          <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('AddTransaction')}>
+            <View style={[styles.actionIconContainer, { backgroundColor: theme.primary }]}>
+              <Ionicons name="add-circle-outline" size={24} color="#fff" />
+            </View>
+            <Text style={[styles.actionText, { color: theme.text }]}>Add Txn</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('MapView')}>
+            <View style={[styles.actionIconContainer, { backgroundColor: theme.info }]}>
+              <Ionicons name="location-outline" size={24} color="#fff" />
+            </View>
+            <Text style={[styles.actionText, { color: theme.text }]}>Map</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Categories')}>
+            <View style={[styles.actionIconContainer, { backgroundColor: theme.warning }]}>
+              <FontAwesome5 name="chart-pie" size={20} color="#fff" />
+            </View>
+            <Text style={[styles.actionText, { color: theme.text }]}>Categories</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Reports')}>
+            <View style={[styles.actionIconContainer, { backgroundColor: theme.primaryDark }]}>
+              <MaterialIcons name="bar-chart" size={24} color="#fff" />
+            </View>
+            <Text style={[styles.actionText, { color: theme.text }]}>Reports</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
       {/* Recent Transactions */}
-      <Text style={styles.sectionTitle}>🔍 Recent Transactions</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>🔍 Recent Transactions</Text>
       {transactions.map((txn) => {
         const getCategoryColor = (category) => {
           const colors = {
@@ -203,16 +176,16 @@ export default function HomeScreen({ navigation }) {
         };
 
         return (
-          <View key={txn.id} style={styles.transactionItem}>
+          <View key={txn.id} style={[styles.transactionItem, { backgroundColor: theme.backgroundCard }]}>
             <View style={[styles.txnIconContainer, { backgroundColor: getCategoryBg(txn.category) }]}>
               <Ionicons name={txn.icon} size={24} color={getCategoryColor(txn.category)} />
             </View>
             <View style={styles.txnInfo}>
-              <Text style={styles.txnTitle}>{txn.merchant || txn.category}</Text>
-              <Text style={styles.txnSub}>{txn.category} • {txn.date}</Text>
+              <Text style={[styles.txnTitle, { color: theme.text }]}>{txn.merchant || txn.category}</Text>
+              <Text style={[styles.txnSub, { color: theme.textSecondary }]}>{txn.category} • {txn.date}</Text>
             </View>
-            <Text style={[styles.txnAmount, { color: txn.amount < 0 ? '#43C6AC' : '#FF6B6B' }]}>
-              {txn.amount < 0 ? '+' : '-'}₹{Math.abs(txn.amount)}
+            <Text style={[styles.txnAmount, { color: txn.amount > 0 ? theme.success : theme.error }]}>
+              {txn.amount > 0 ? '+' : ''}₹{Math.abs(txn.amount)}
             </Text>
           </View>
         );
@@ -221,7 +194,7 @@ export default function HomeScreen({ navigation }) {
       {/* View All */}
       <TouchableOpacity onPress={() => navigation.navigate('CompleteUserTrxn')}>
         <LinearGradient
-          colors={['#667eea', '#764ba2']}
+          colors={theme.gradientColors}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.viewAllBtn}
@@ -271,10 +244,11 @@ const styles = StyleSheet.create({
   cardScroll: { flexDirection: 'row', marginBottom: 20 },
   summaryCard: {
     backgroundColor: '#fff',
-    padding: 20,
+    padding: 16,
     borderRadius: 20,
     marginRight: 12,
     width: 200,
+    minHeight: 180,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -282,6 +256,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderLeftWidth: 4,
     borderLeftColor: '#667eea',
+    overflow: 'hidden',
   },
   cardTitle: {
     fontSize: 14,
@@ -291,29 +266,31 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   cardAmount: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginVertical: 8,
+    marginVertical: 4,
     color: '#333',
   },
   cardSub: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#667eea',
     fontWeight: '600',
+    marginBottom: 8,
   },
-  chart: {
-    height: 50,
-    marginTop: 10,
-  },
+
+
 
   actionRowContainer: {
     marginBottom: 25,
+    alignItems: 'center',
   },
   actionRow: {
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 20,
     padding: 20,
+    justifyContent: 'space-between',
+    width: Dimensions.get('window').width - 40,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -322,8 +299,7 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     alignItems: 'center',
-    paddingHorizontal: 16,
-    marginRight: 8,
+    flex: 1,
   },
   actionIconContainer: {
     width: 50,

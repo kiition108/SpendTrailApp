@@ -47,15 +47,41 @@ export const AuthProvider = ({ children }) => {
 
       await saveToken(token);
       setUser(user);
+
+      // Track user in Sentry for error reporting
+      if (global.Sentry) {
+        global.Sentry.setUser({
+          id: user._id || user.id,
+          email: user.email,
+          username: user.name
+        });
+      }
     } catch (error) {
       console.log('Login error:', error);
-      alert('Login Failed: ' + (error.response?.data?.message || error.message));
+
+      // Log error to Sentry
+      if (global.Sentry) {
+        global.Sentry.captureException(error);
+      }
+
+      // Return error details for frontend handling
+      const errorData = error.response?.data || {};
+      throw {
+        message: errorData.message || error.message,
+        isVerified: errorData.isVerified,
+        userId: errorData.userId
+      };
     }
   };
 
   const logout = async () => {
     await removeToken();
     setUser(null);
+
+    // Clear Sentry user context
+    if (global.Sentry) {
+      global.Sentry.setUser(null);
+    }
   };
 
   const register = async (email, password) => {
@@ -69,10 +95,27 @@ export const AuthProvider = ({ children }) => {
         return { success: true, requiresOtp: false };
       }
 
-      return { success: true, requiresOtp: true };
+      // Return userId for OTP verification (works for both new and unverified re-registration)
+      return {
+        success: true,
+        requiresOtp: true,
+        userId: res.data.userId || res.data.user?._id
+      };
     } catch (error) {
       console.log('Register error:', error);
-      alert('Registration Issue: ' + (error.response?.data?.message || error.message));
+      const errorData = error.response?.data || {};
+
+      // If already registered but not verified, return userId
+      if (errorData.userId) {
+        return {
+          success: true,
+          requiresOtp: true,
+          userId: errorData.userId,
+          message: errorData.message
+        };
+      }
+
+      alert('Registration Issue: ' + (errorData.message || error.message));
       return { success: false };
     }
   };

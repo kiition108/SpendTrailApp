@@ -5,8 +5,11 @@ import * as Location from 'expo-location';
 import API from '../services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import ErrorBoundary from '../components/ErrorBoundary';
+import { useTheme } from '../context/ThemeContext';
 
 export default function MapViewScreen({ navigation }) {
+  const { theme } = useTheme();
   const [userLocation, setUserLocation] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [filteredTxns, setFilteredTxns] = useState([]);
@@ -42,13 +45,32 @@ export default function MapViewScreen({ navigation }) {
             (txn.location.lng || txn.location.longitude || txn.location.lon);
           return hasCoords;
         }).map(txn => {
-          // Normalize coordinates
+          // Safely extract coordinate values
+          const lat = txn.location.lat || txn.location.latitude;
+          const lng = txn.location.lng || txn.location.longitude || txn.location.lon;
+
+          // Parse and validate coordinates
+          const latitude = parseFloat(lat);
+          const longitude = parseFloat(lng);
+
+          // Return null if invalid (will be filtered out)
+          if (isNaN(latitude) || isNaN(longitude)) {
+            console.warn('Invalid coordinates for transaction:', txn._id, { lat, lng });
+            return null;
+          }
+
+          // Validate coordinate ranges (lat: -90 to 90, lng: -180 to 180)
+          if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            console.warn('Coordinates out of range:', txn._id, { latitude, longitude });
+            return null;
+          }
+
           return {
             ...txn,
-            latitude: parseFloat(txn.location.lat || txn.location.latitude),
-            longitude: parseFloat(txn.location.lng || txn.location.longitude || txn.location.lon)
+            latitude,
+            longitude
           };
-        });
+        }).filter(txn => txn !== null); // Remove invalid entries
 
         console.log('Valid transactions for map:', validTxns.length);
         setTransactions(validTxns);
@@ -105,84 +127,86 @@ export default function MapViewScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        provider={PROVIDER_GOOGLE}
-        style={styles.map}
-        initialRegion={{
-          latitude: userLocation ? userLocation.latitude : 28.6139,
-          longitude: userLocation ? userLocation.longitude : 77.2090,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-        showsUserLocation={true}
-        showsMyLocationButton={true}
-      >
-        {filteredTxns.map((txn, index) => (
-          <Marker
-            key={txn.id || index}
-            coordinate={{
-              latitude: txn.latitude,
-              longitude: txn.longitude,
-            }}
-          >
-            <View style={[styles.markerContainer, { backgroundColor: getCategoryColor(txn.category) }]}>
-              <Ionicons name={getCategoryIcon(txn.category)} size={16} color="white" />
-            </View>
-            <Callout>
-              <View style={styles.calloutContainer}>
-                <View style={[styles.calloutHeader, { backgroundColor: getCategoryColor(txn.category) }]}>
-                  <Text style={styles.calloutTitle}>{txn.category}</Text>
-                </View>
-                <View style={styles.calloutContent}>
-                  <Text style={styles.merchantText}>{txn.merchant || 'Merchant'}</Text>
-                  <Text style={[
-                    styles.amountText,
-                    { color: txn.amount < 0 ? '#43C6AC' : '#FF6B6B' }
-                  ]}>
-                    {txn.amount < 0 ? '+' : '-'}₹{Math.abs(txn.amount)}
-                  </Text>
-                  <Text style={styles.dateText}>
-                    {new Date(txn.timestamp || txn.date).toLocaleDateString()}
-                  </Text>
-                </View>
+    <ErrorBoundary navigation={navigation}>
+      <View style={styles.container}>
+        <MapView
+          ref={mapRef}
+          provider={PROVIDER_GOOGLE}
+          style={styles.map}
+          initialRegion={{
+            latitude: userLocation ? userLocation.latitude : 28.6139,
+            longitude: userLocation ? userLocation.longitude : 77.2090,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          }}
+          showsUserLocation={true}
+          showsMyLocationButton={true}
+        >
+          {filteredTxns.map((txn, index) => (
+            <Marker
+              key={txn.id || index}
+              coordinate={{
+                latitude: txn.latitude,
+                longitude: txn.longitude,
+              }}
+            >
+              <View style={[styles.markerContainer, { backgroundColor: getCategoryColor(txn.category) }]}>
+                <Ionicons name={getCategoryIcon(txn.category)} size={16} color="white" />
               </View>
-            </Callout>
-          </Marker>
-        ))}
+              <Callout>
+                <View style={styles.calloutContainer}>
+                  <View style={[styles.calloutHeader, { backgroundColor: getCategoryColor(txn.category) }]}>
+                    <Text style={styles.calloutTitle}>{txn.category}</Text>
+                  </View>
+                  <View style={styles.calloutContent}>
+                    <Text style={styles.merchantText}>{txn.merchant || 'Merchant'}</Text>
+                    <Text style={[
+                      styles.amountText,
+                      { color: txn.amount > 0 ? '#43C6AC' : '#FF6B6B' }
+                    ]}>
+                      {txn.amount > 0 ? '+' : ''}₹{Math.abs(txn.amount)}
+                    </Text>
+                    <Text style={styles.dateText}>
+                      {new Date(txn.timestamp || txn.date).toLocaleDateString()}
+                    </Text>
+                  </View>
+                </View>
+              </Callout>
+            </Marker>
+          ))}
 
-      </MapView>
+        </MapView>
 
-      {/* Category Filter Chips */}
-      <View style={styles.categoriesContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsScroll}>
-          <TouchableOpacity
-            style={[
-              styles.chip,
-              selectedCategory === null && styles.activeChip
-            ]}
-            onPress={() => setSelectedCategory(null)}
-          >
-            <Text style={[styles.chipText, selectedCategory === null && styles.activeChipText]}>All</Text>
-          </TouchableOpacity>
-
-          {categories.map((cat) => (
+        {/* Category Filter Chips */}
+        <View style={styles.categoriesContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsScroll}>
             <TouchableOpacity
-              key={cat}
               style={[
                 styles.chip,
-                selectedCategory === cat && styles.activeChip
+                selectedCategory === null && styles.activeChip
               ]}
-              onPress={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+              onPress={() => setSelectedCategory(null)}
             >
-              <View style={[styles.dot, { backgroundColor: getCategoryColor(cat) }]} />
-              <Text style={[styles.chipText, selectedCategory === cat && styles.activeChipText]}>{cat}</Text>
+              <Text style={[styles.chipText, selectedCategory === null && styles.activeChipText]}>All</Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+
+            {categories.map((cat) => (
+              <TouchableOpacity
+                key={cat}
+                style={[
+                  styles.chip,
+                  selectedCategory === cat && styles.activeChip
+                ]}
+                onPress={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+              >
+                <View style={[styles.dot, { backgroundColor: getCategoryColor(cat) }]} />
+                <Text style={[styles.chipText, selectedCategory === cat && styles.activeChipText]}>{cat}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
       </View>
-    </View>
+    </ErrorBoundary>
   );
 }
 

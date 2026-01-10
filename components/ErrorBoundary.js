@@ -13,36 +13,44 @@ class ErrorBoundary extends React.Component {
     }
 
     componentDidCatch(error, errorInfo) {
-        // Log error to monitoring service (e.g., Sentry)
-        console.error('Error Boundary caught:', error, errorInfo);
+        console.error('ErrorBoundary caught an error:', error, errorInfo);
 
-        // TODO: Send to error tracking service
-        // Sentry.captureException(error, { extra: errorInfo });
+        // If Sentry is available, log the error
+        if (global.Sentry) {
+            global.Sentry.captureException(error, { contexts: { errorInfo } });
+        }
     }
-
-    handleReset = () => {
-        this.setState({ hasError: false, error: null });
-    };
 
     render() {
         if (this.state.hasError) {
             return (
                 <View style={styles.container}>
-                    <Ionicons name="alert-circle" size={64} color="#ff3b30" />
+                    <Ionicons name="alert-circle" size={64} color="#FF6B6B" />
                     <Text style={styles.title}>Oops! Something went wrong</Text>
                     <Text style={styles.message}>
-                        We're sorry for the inconvenience. The app encountered an unexpected error.
+                        {this.state.error?.message || 'An unexpected error occurred'}
                     </Text>
 
-                    {__DEV__ && this.state.error && (
-                        <View style={styles.errorDetails}>
-                            <Text style={styles.errorText}>{this.state.error.toString()}</Text>
-                        </View>
+                    {this.props.onReset && (
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => {
+                                this.setState({ hasError: false, error: null });
+                                this.props.onReset?.();
+                            }}
+                        >
+                            <Text style={styles.buttonText}>Try Again</Text>
+                        </TouchableOpacity>
                     )}
 
-                    <TouchableOpacity style={styles.button} onPress={this.handleReset}>
-                        <Text style={styles.buttonText}>Try Again</Text>
-                    </TouchableOpacity>
+                    {this.props.navigation && (
+                        <TouchableOpacity
+                            style={[styles.button, styles.secondaryButton]}
+                            onPress={() => this.props.navigation.goBack()}
+                        >
+                            <Text style={[styles.buttonText, styles.secondaryButtonText]}>Go Back</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             );
         }
@@ -57,14 +65,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#fff',
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#333',
         marginTop: 20,
         marginBottom: 10,
+        color: '#333',
     },
     message: {
         fontSize: 16,
@@ -73,28 +81,27 @@ const styles = StyleSheet.create({
         marginBottom: 30,
         paddingHorizontal: 20,
     },
-    errorDetails: {
-        backgroundColor: '#ffebee',
-        padding: 16,
-        borderRadius: 8,
-        marginBottom: 20,
-        width: '100%',
-    },
-    errorText: {
-        fontSize: 14,
-        color: '#c62828',
-        fontFamily: 'monospace',
-    },
     button: {
         backgroundColor: '#667eea',
         paddingHorizontal: 32,
-        paddingVertical: 16,
-        borderRadius: 12,
+        paddingVertical: 14,
+        borderRadius: 8,
+        marginTop: 10,
+        minWidth: 200,
     },
     buttonText: {
         color: '#fff',
         fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    secondaryButton: {
+        backgroundColor: '#fff',
+        borderWidth: 2,
+        borderColor: '#667eea',
+    },
+    secondaryButtonText: {
+        color: '#667eea',
     },
 });
 

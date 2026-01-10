@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import API from "../services/api";
 import { formatFullTransactionList } from "../utils/transactionFormatter";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../context/ThemeContext';
 
 export default function CompleteUserTransactionsScreen({ navigation }) {
+  const { theme } = useTheme();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,9 +54,9 @@ export default function CompleteUserTransactionsScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#667eea" />
-        <Text style={styles.loadingText}>Loading transactions...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Loading transactions...</Text>
       </View>
     );
   }
@@ -67,9 +69,9 @@ export default function CompleteUserTransactionsScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <LinearGradient
-        colors={['#667eea', '#764ba2']}
+        colors={theme.gradientColors}
         style={styles.header}
       >
         <Text style={styles.headerTitle}>All Transactions</Text>
@@ -90,9 +92,9 @@ export default function CompleteUserTransactionsScreen({ navigation }) {
 
       {transactions.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="receipt-outline" size={80} color="#ccc" />
-          <Text style={styles.emptyText}>No transactions yet</Text>
-          <Text style={styles.emptySubtext}>Start tracking your expenses</Text>
+          <Ionicons name="receipt-outline" size={80} color={theme.textTertiary} />
+          <Text style={[styles.emptyText, { color: theme.text }]}>No transactions yet</Text>
+          <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>Start tracking your expenses</Text>
         </View>
       ) : (
         <ScrollView
@@ -105,6 +107,7 @@ export default function CompleteUserTransactionsScreen({ navigation }) {
               key={txn.id}
               style={[
                 styles.transactionCard,
+                { backgroundColor: theme.backgroundCard },
                 index === filteredTransactions.length - 1 && styles.lastCard
               ]}
               onPress={() => navigation.navigate('TransactionDetail', { transaction: txn })}
@@ -122,22 +125,22 @@ export default function CompleteUserTransactionsScreen({ navigation }) {
               </View>
 
               <View style={styles.txnInfo}>
-                <Text style={styles.txnTitle}>{txn.merchant || txn.category}</Text>
+                <Text style={[styles.txnTitle, { color: theme.text }]}>{txn.merchant || txn.category}</Text>
                 <View style={styles.txnMetaRow}>
-                  <Ionicons name="pricetag-outline" size={12} color="#999" />
-                  <Text style={styles.txnCategory}>{txn.category}</Text>
-                  <Text style={styles.txnDot}>•</Text>
-                  <Ionicons name="calendar-outline" size={12} color="#999" />
-                  <Text style={styles.txnDate}>{txn.date}</Text>
+                  <Ionicons name="pricetag-outline" size={12} color={theme.textTertiary} />
+                  <Text style={[styles.txnCategory, { color: theme.textSecondary }]}>{txn.category}</Text>
+                  <Text style={[styles.txnDot, { color: theme.textTertiary }]}>•</Text>
+                  <Ionicons name="calendar-outline" size={12} color={theme.textTertiary} />
+                  <Text style={[styles.txnDate, { color: theme.textSecondary }]}>{txn.date}</Text>
                 </View>
               </View>
 
               <View style={styles.amountContainer}>
                 <Text style={[
                   styles.txnAmount,
-                  { color: txn.amount < 0 ? '#43C6AC' : '#FF6B6B' }
+                  { color: txn.amount > 0 ? '#43C6AC' : '#FF6B6B' }
                 ]}>
-                  {txn.amount < 0 ? '+' : '-'}₹{Math.abs(txn.amount)}
+                  {txn.amount > 0 ? '+' : ''}₹{Math.abs(txn.amount)}
                 </Text>
                 <Ionicons name="chevron-forward" size={20} color="#ccc" />
               </View>

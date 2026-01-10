@@ -21,7 +21,8 @@
       "env": {
         "API_BASE_URL": "$API_BASE_URL",
         "SMS_WEBHOOK_KEY": "$SMS_WEBHOOK_KEY",
-        "NODE_ENV": "$NODE_ENV"
+        "NODE_ENV": "$NODE_ENV",
+        "SENTRY_DSN": "$SENTRY_DSN"
       }
     },
     "production": {
@@ -34,7 +35,8 @@
       "env": {
         "API_BASE_URL": "$API_BASE_URL",
         "SMS_WEBHOOK_KEY": "$SMS_WEBHOOK_KEY",
-        "NODE_ENV": "$NODE_ENV"
+        "NODE_ENV": "$NODE_ENV",
+        "SENTRY_DSN": "$SENTRY_DSN"
       }
     }
   },

@@ -229,7 +229,7 @@ export default function ImportTransactionsScreen({ navigation }) {
                             {transactions.slice(0, 3).map((txn, index) => (
                                 <View key={index} style={styles.previewItem}>
                                     <Text style={styles.previewAmount}>
-                                        {txn.amount < 0 ? '+' : '-'}₹{Math.abs(txn.amount)}
+                                        {txn.amount > 0 ? '+' : ''}₹{Math.abs(txn.amount)}
                                     </Text>
                                     <Text style={styles.previewMerchant}>{txn.merchant}</Text>
                                     <Text style={styles.previewCategory}>{txn.category}</Text>

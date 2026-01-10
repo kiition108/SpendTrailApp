@@ -40,7 +40,15 @@ export default function RegisterScreen({ navigation }) {
     setLoading(false);
 
     if (res && res.success && res.requiresOtp) {
-      navigation.navigate('VerifyOtp', { email });
+      // Show info message if user already existed but wasn't verified
+      if (res.message) {
+        alert(res.message + '\nA new OTP has been sent to your email.');
+      }
+
+      navigation.navigate('OTPVerification', {
+        userId: res.userId,
+        email: email
+      });
     }
   };
 
@@ -50,7 +58,7 @@ export default function RegisterScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <LinearGradient
-        colors={['#f093fb', '#f5576c']}
+        colors={['#667eea', '#764ba2']}
         style={styles.gradient}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -70,7 +78,7 @@ export default function RegisterScreen({ navigation }) {
 
             {/* Email Input */}
             <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#f5576c" style={styles.inputIcon} />
+              <Ionicons name="mail-outline" size={20} color="#667eea" style={styles.inputIcon} />
               <TextInput
                 placeholder="Email"
                 placeholderTextColor="#999"
@@ -84,7 +92,7 @@ export default function RegisterScreen({ navigation }) {
 
             {/* Password Input */}
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#f5576c" style={styles.inputIcon} />
+              <Ionicons name="lock-closed-outline" size={20} color="#667eea" style={styles.inputIcon} />
               <TextInput
                 placeholder="Password"
                 placeholderTextColor="#999"
@@ -129,7 +137,7 @@ export default function RegisterScreen({ navigation }) {
               disabled={loading}
             >
               <LinearGradient
-                colors={['#f093fb', '#f5576c']}
+                colors={['#667eea', '#764ba2']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.buttonGradient}
@@ -235,7 +243,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#f5576c',
+    shadowColor: '#667eea',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -260,7 +268,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   loginLink: {
-    color: '#f5576c',
+    color: '#667eea',
     fontSize: 14,
     fontWeight: 'bold',
   },

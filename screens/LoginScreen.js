@@ -13,13 +13,16 @@ import {
 import { AuthContext } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../context/ThemeContext';
 
 export default function LoginScreen({ navigation }) {
+  const { theme } = useTheme();
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [unverifiedUser, setUnverifiedUser] = useState(null); // {userId, email}
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -27,8 +30,27 @@ export default function LoginScreen({ navigation }) {
       return;
     }
     setLoading(true);
-    await login(email, password);
+    setUnverifiedUser(null);
+    try {
+      await login(email, password);
+    } catch (error) {
+      // Check if user is unverified
+      if (error.isVerified === false && error.userId) {
+        setUnverifiedUser({ userId: error.userId, email });
+      } else {
+        alert('Login Failed: ' + error.message);
+      }
+    }
     setLoading(false);
+  };
+
+  const handleVerifyAccount = () => {
+    if (unverifiedUser) {
+      navigation.navigate('OTPVerification', {
+        userId: unverifiedUser.userId,
+        email: unverifiedUser.email
+      });
+    }
   };
 
   return (
@@ -51,40 +73,40 @@ export default function LoginScreen({ navigation }) {
           </View>
 
           {/* Form Section */}
-          <View style={styles.formContainer}>
-            <Text style={styles.welcomeText}>Welcome Back</Text>
-            <Text style={styles.subtitleText}>Sign in to continue</Text>
+          <View style={[styles.formContainer, { backgroundColor: theme.backgroundCard }]}>
+            <Text style={[styles.welcomeText, { color: theme.text }]}>Welcome Back</Text>
+            <Text style={[styles.subtitleText, { color: theme.textSecondary }]}>Sign in to continue</Text>
 
             {/* Email Input */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#667eea" style={styles.inputIcon} />
+            <View style={[styles.inputContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
+              <Ionicons name="mail-outline" size={20} color={theme.primary} style={styles.inputIcon} />
               <TextInput
                 placeholder="Email"
-                placeholderTextColor="#999"
+                placeholderTextColor={theme.textTertiary}
                 value={email}
                 onChangeText={setEmail}
-                style={styles.input}
+                style={[styles.input, { color: theme.text }]}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
             </View>
 
             {/* Password Input */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#667eea" style={styles.inputIcon} />
+            <View style={[styles.inputContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
+              <Ionicons name="lock-closed-outline" size={20} color={theme.primary} style={styles.inputIcon} />
               <TextInput
                 placeholder="Password"
-                placeholderTextColor="#999"
+                placeholderTextColor={theme.textTertiary}
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
-                style={styles.input}
+                style={[styles.input, { color: theme.text }]}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <Ionicons
                   name={showPassword ? "eye-outline" : "eye-off-outline"}
                   size={20}
-                  color="#999"
+                  color={theme.textSecondary}
                 />
               </TouchableOpacity>
             </View>
@@ -107,13 +129,45 @@ export default function LoginScreen({ navigation }) {
               </LinearGradient>
             </TouchableOpacity>
 
+            {/* Verify Account Alert (shows when unverified user detected) */}
+            {unverifiedUser && (
+              <View style={styles.verifyAlertContainer}>
+                <View style={[styles.verifyAlert, { backgroundColor: theme.warning + '20', borderColor: theme.warning }]}>
+                  <Ionicons name="alert-circle-outline" size={24} color={theme.warning} />
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={[styles.verifyAlertTitle, { color: theme.text }]}>Account Not Verified</Text>
+                    <Text style={[styles.verifyAlertText, { color: theme.textSecondary }]}>
+                      Please verify your email to access your account
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={[styles.verifyButton, { backgroundColor: theme.warning }]}
+                  onPress={handleVerifyAccount}
+                >
+                  <Text style={styles.verifyButtonText}>Verify Account</Text>
+                  <Ionicons name="arrow-forward" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            )}
+
             {/* Register Link */}
             <View style={styles.registerContainer}>
-              <Text style={styles.registerText}>Don't have an account? </Text>
+              <Text style={[styles.registerText, { color: theme.textSecondary }]}>Don't have an account? </Text>
               <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                <Text style={styles.registerLink}>Sign Up</Text>
+                <Text style={[styles.registerLink, { color: theme.primary }]}>Sign Up</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Forgot Password Link */}
+            <TouchableOpacity
+              style={styles.forgotPasswordContainer}
+              onPress={() => navigation.navigate('ForgotPassword')}
+            >
+              <Text style={[styles.forgotPasswordText, { color: theme.textSecondary }]}>
+                Forgot your password?
+              </Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </LinearGradient>
@@ -230,5 +284,47 @@ const styles = StyleSheet.create({
     color: '#667eea',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  verifyAlertContainer: {
+    marginTop: 20,
+    width: '100%',
+  },
+  verifyAlert: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  verifyAlertTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  verifyAlertText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  verifyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  verifyButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  forgotPasswordContainer: {
+    alignItems: 'center',
+    marginTop: 15,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    textDecorationLine: 'underline',
   },
 });

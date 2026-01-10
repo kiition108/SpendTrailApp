@@ -4,22 +4,16 @@ import { PieChart } from '../components/Charts';
 import API from '../services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../context/ThemeContext';
+import { categoryColors } from '../utils/categoryColors';
 
 export default function CategoriesScreen({ navigation }) {
+    const { theme } = useTheme();
     const [loading, setLoading] = useState(true);
     const [categoryData, setCategoryData] = useState([]);
     const [totalExpense, setTotalExpense] = useState(0);
 
-    const categoryColors = {
-        Food: '#FF6B6B',
-        Transport: '#4ECDC4',
-        Shopping: '#FFB84D',
-        Entertainment: '#A461D8',
-        Bills: '#43C6AC',
-        Health: '#FD79A8',
-        Other: '#667eea',
-        Uncategorized: '#95a5a6'
-    };
+
 
     useEffect(() => {
         fetchCategoryData();
@@ -63,16 +57,16 @@ export default function CategoriesScreen({ navigation }) {
 
     if (loading) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#667eea" />
+            <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+                <ActivityIndicator size="large" color={theme.primary} />
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
             <LinearGradient
-                colors={['#667eea', '#764ba2']}
+                colors={theme.gradientColors}
                 style={styles.header}
             >
                 <Text style={styles.headerTitle}>Spending by Category</Text>
@@ -81,7 +75,7 @@ export default function CategoriesScreen({ navigation }) {
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 {/* Pie Chart Section */}
-                <View style={styles.chartCard}>
+                <View style={[styles.chartCard, { backgroundColor: theme.backgroundCard }]}>
                     {categoryData.length > 0 ? (
                         <PieChart
                             style={{ height: 200, width: '100%' }}
@@ -92,26 +86,26 @@ export default function CategoriesScreen({ navigation }) {
                         />
                     ) : (
                         <View style={styles.emptyChart}>
-                            <Text style={styles.emptyText}>No expense data available</Text>
+                            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No expense data available</Text>
                         </View>
                     )}
                 </View>
 
                 {/* Category List */}
                 <View style={styles.listContainer}>
-                    <Text style={styles.sectionTitle}>Breakdown</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Breakdown</Text>
                     {categoryData.map((item, index) => (
-                        <View key={index} style={styles.categoryItem}>
+                        <View key={index} style={[styles.categoryItem, { backgroundColor: theme.backgroundCard }]}>
                             <View style={styles.catLeft}>
                                 <View style={[styles.colorDot, { backgroundColor: item.svg.fill }]} />
                                 <View>
-                                    <Text style={styles.catName}>{item.key}</Text>
-                                    <Text style={styles.catPercent}>
+                                    <Text style={[styles.catName, { color: theme.text }]}>{item.key}</Text>
+                                    <Text style={[styles.catPercent, { color: theme.textSecondary }]}>
                                         {((item.value / totalExpense) * 100).toFixed(1)}%
                                     </Text>
                                 </View>
                             </View>
-                            <Text style={styles.catAmount}>₹{item.value.toFixed(2)}</Text>
+                            <Text style={[styles.catAmount, { color: theme.text }]}>₹{item.value.toFixed(2)}</Text>
                         </View>
                     ))}
                 </View>
