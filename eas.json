@@ -17,6 +17,11 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "API_BASE_URL": "$API_BASE_URL",
+        "SMS_WEBHOOK_KEY": "$SMS_WEBHOOK_KEY",
+        "NODE_ENV": "$NODE_ENV"
       }
     },
     "production": {
@@ -25,6 +30,11 @@
       },
       "ios": {
         "buildConfiguration": "Release"
+      },
+      "env": {
+        "API_BASE_URL": "$API_BASE_URL",
+        "SMS_WEBHOOK_KEY": "$SMS_WEBHOOK_KEY",
+        "NODE_ENV": "$NODE_ENV"
       }
     }
   },
