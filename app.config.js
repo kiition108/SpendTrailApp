@@ -45,7 +45,7 @@ export default {
                 "@sentry/react-native",
                 {
                     organization: process.env.SENTRY_ORG || "kishan-singh-9p",
-                    project: process.env.SENTRY_PROJECT || "spendtrailapp",
+                    project: process.env.SENTRY_PROJECT || "spendtrail",
                 }
             ]
         ],
